@@ -5,6 +5,7 @@
     "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
+    "@farcaster/auth-client": "^0.3.0",
     "@supabase/supabase-js": "^2.49.4",
     "hono": "^4.7.6",
     "pinata": "^2.2.0"
