@@ -17,6 +17,7 @@ interface Bindings {
   GATEWAY_URL: string;
   SUPABASE_URL: string;
   SERVICE_KEY: string;
+  DOMAIN: string;
 }
 
 type Variables = {
@@ -40,6 +41,28 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
+app.post('/verify', async (c) => {
+  const body = await c.req.json();
+  const { nonce, message, signature } = body;
+
+  const verifyResult = await appClient.verifySignInMessage({
+    nonce,
+    domain: c.env.DOMAIN, // Make sure this matches your domain
+    message,
+    signature
+  });
+
+  if (!verifyResult.success) {
+    return c.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  // Return the fid from the verification result
+  return c.json({
+    status: "ok",
+    fid: verifyResult.fid
+  });
+});
+
 app.post('/presigned_url', async (c) => {
 
   const body = await c.req.json()
@@ -48,7 +71,7 @@ app.post('/presigned_url', async (c) => {
 
   const { data, success, fid } = await appClient.verifySignInMessage({
     nonce,
-    domain: 'steves-macbook-pro.tailadeea5.ts.net',
+    domain: c.env.DOMAIN,
     message,
     signature
   });
@@ -74,7 +97,7 @@ app.post('/boards', async (c) => {
 
   const { data, success, fid } = await appClient.verifySignInMessage({
     nonce,
-    domain: 'steves-macbook-pro.tailadeea5.ts.net',
+    domain: c.env.DOMAIN,
     message,
     signature
   });
@@ -127,7 +150,7 @@ app.post('/list-boards', async (c) => {
 
   const { data, success, fid } = await appClient.verifySignInMessage({
     nonce,
-    domain: 'steves-macbook-pro.tailadeea5.ts.net',
+    domain: c.env.DOMAIN,
     message,
     signature
   });
