@@ -192,4 +192,58 @@ app.get('/board/:slug', async (c) => {
   return c.json(board)
 })
 
+app.get('/embed/:slug', async (c) => {
+  const { supabase } = c.get('services')
+  const slug = c.req.param('slug')
+
+  // Get the board and its images from supabase
+  const { data: board, error } = await supabase
+    .from('boards')
+    .select('*, board_images(*)')
+    .eq('slug', slug)
+    .single()
+
+  let imageUrl = "https://billboards.cloud/image.png" // Default fallback image
+
+  // If we have board data and it has images, use the first image URL
+  if (board && board.board_images && board.board_images.length > 0) {
+    imageUrl = board.board_images[0].image_url
+  }
+
+  const data = JSON.stringify({
+    version: "next",
+    imageUrl: imageUrl,
+    button: {
+      title: "View",
+      action: {
+        type: "launch_frame",
+        url: `https://billboards.cloud/board/${slug}`,
+        name: "Billboards",
+        splashImageUrl: "https://billboards.cloud/splash.png",
+        splashBackgroundColor: "#FEF3C9"
+      }
+    }
+  })
+  return c.html(`
+    <title>Billboards</title>
+    <meta name="description" content="Share images on Farcaster">
+
+    <meta property="og:url" content="https://billboards.cloud">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Billboards">
+    <meta property="og:description" content="Share images on Farcaster">
+    <meta property="og:image" content="https://billboards.cloud/og.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="billboards.cloud">
+    <meta property="twitter:url" content="https://billboards.cloud">
+    <meta name="twitter:title" content="Billboards">
+    <meta name="twitter:description" content="Share images on Farcaster">
+    <meta name="twitter:image" content="https://billboards.cloud/og.png">
+
+    <meta name="fc:frame" content='${data}'/>
+  `)
+
+})
+
 export default app
