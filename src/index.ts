@@ -40,7 +40,7 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
-app.get('/presigned_url', async (c) => {
+app.post('/presigned_url', async (c) => {
 
   const body = await c.req.json()
 
@@ -48,7 +48,7 @@ app.get('/presigned_url', async (c) => {
 
   const { data, success, fid } = await appClient.verifySignInMessage({
     nonce,
-    domain: 'billboards.cloud',
+    domain: 'steves-macbook-pro.tailadeea5.ts.net',
     message,
     signature
   });
@@ -74,7 +74,7 @@ app.post('/boards', async (c) => {
 
   const { data, success, fid } = await appClient.verifySignInMessage({
     nonce,
-    domain: 'billboards.cloud',
+    domain: 'steves-macbook-pro.tailadeea5.ts.net',
     message,
     signature
   });
@@ -118,23 +118,18 @@ app.post('/boards', async (c) => {
   return c.json({ status: "ok" })
 })
 
-app.get('/boards', async (c) => {
+app.post('/list-boards', async (c) => {
 
   const { supabase } = c.get('services')
+  const body = await c.req.json()
 
-  const nonce = c.req.header('nonce')
-  const message = c.req.header('message')
-  const signature = c.req.header('signature')
-
-  if (!nonce || !message || !signature) {
-    return c.json({ error: "Missing auth header" }, { status: 500 })
-  }
+  const { nonce, message, signature } = body
 
   const { data, success, fid } = await appClient.verifySignInMessage({
     nonce,
-    domain: 'billboards.cloud',
+    domain: 'steves-macbook-pro.tailadeea5.ts.net',
     message,
-    signature: signature as `0x`
+    signature
   });
 
   if (!success) {
